@@ -6,6 +6,9 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
     title: "Privacy Policy — Cachet",
     description: "Privacy Policy for Cachet, the NFT verification platform for Discord communities on MegaETH.",
+    alternates: {
+        canonical: "/privacy",
+    },
 };
 
 export default function PrivacyPage() {

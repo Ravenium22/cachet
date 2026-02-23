@@ -6,6 +6,9 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
     title: "Refund Policy — Cachet",
     description: "Refund Policy for Cachet, the NFT verification platform for Discord communities on MegaETH.",
+    alternates: {
+        canonical: "/refund-policy",
+    },
 };
 
 export default function RefundPolicyPage() {

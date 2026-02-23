@@ -6,6 +6,9 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
     title: "Terms of Service — Cachet",
     description: "Terms of Service for Cachet, the NFT verification platform for Discord communities on MegaETH.",
+    alternates: {
+        canonical: "/terms",
+    },
 };
 
 export default function TermsPage() {

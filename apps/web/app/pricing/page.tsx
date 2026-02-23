@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 
 function formatLimit(value: number): string {
     if (!Number.isFinite(value)) {
@@ -26,6 +27,53 @@ interface SubscriptionState {
     tier: SubscriptionTier;
     status: string;
 }
+
+const pricingFaqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+        {
+            "@type": "Question",
+            name: "What payment methods do you accept?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "We accept all major credit cards, PayPal, and select local payment methods through our payment processor Paddle. All prices are in USD.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Can I change plans at any time?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes. Upgrades take effect immediately. Downgrades apply at the end of your current billing cycle.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Is there a free trial?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "The Free tier is available indefinitely with up to 100 verified members. No credit card required.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "What happens if I exceed my plan limits?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "You will be prompted to upgrade. Existing verifications remain active, but new verifications will be blocked until you upgrade or reduce usage.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Can I get a refund?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "All sales are final. We offer a free tier so you can evaluate the platform before committing. See our refund policy for details.",
+            },
+        },
+    ],
+};
 
 export default function PricingPage() {
     const { isAuthenticated, isLoading } = useAuth();
@@ -50,6 +98,7 @@ export default function PricingPage() {
 
     return (
         <div className="min-h-screen bg-brand-black text-brand-white flex flex-col font-sans">
+            <JsonLd data={pricingFaqSchema} />
             <Header showAuth activePage="pricing" />
 
             <main className="relative flex-1 overflow-hidden">

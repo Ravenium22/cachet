@@ -6,11 +6,16 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
+const siteUrl = process.env["NEXT_PUBLIC_SITE_URL"] ?? "https://usecachet.com";
+
 export const metadata: Metadata = {
-  title: "Cachet — NFT Verification for Discord",
+  title: "Cachet — NFT Verification Bot for Discord | MegaETH",
   description:
     "Strict NFT verification for MegaETH communities. Connect wallets, verify on-chain holdings, and automate Discord role management. Frictionless structure, zero compromise.",
-  metadataBase: new URL(process.env["NEXT_PUBLIC_SITE_URL"] ?? "https://usecachet.com"),
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "Cachet — Strict NFT Verification",
     description:
@@ -18,6 +23,7 @@ export const metadata: Metadata = {
     siteName: "Cachet",
     locale: "en_US",
     type: "website",
+    url: siteUrl,
     images: [
       {
         url: "/og-image.png",

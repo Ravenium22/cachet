@@ -5,6 +5,7 @@ import { BILLING_PLANS, TIER_LIMITS } from "@megaeth-verify/shared";
 import { Header } from "@/components/Header";
 import { HeroCTA, PricingCTA } from "@/components/AuthCTA";
 import { InteractiveDemo } from "@/components/InteractiveDemo";
+import { JsonLd } from "@/components/JsonLd";
 
 function formatLimit(value: number): string {
     if (!Number.isFinite(value)) {
@@ -14,9 +15,83 @@ function formatLimit(value: number): string {
     return value.toLocaleString();
 }
 
+const homeFaqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+        {
+            "@type": "Question",
+            name: "How does Cachet work?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Cachet is a Discord bot and dashboard platform. You invite the bot, create mappings between your MegaETH NFT contracts and Discord roles in our dashboard. When a user clicks your verify button in Discord, they are directed to a secure Cachet page to connect their wallet and sign a gasless message. If they own the required NFT, the bot assigns them the role immediately.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Is there a free tier?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes! We offer a generous free tier that supports up to 100 verified members across your servers, perfect for small communities or testing out the protocol before upgrading.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Which blockchains are supported?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "We are exclusively focused on MegaETH. We connect directly to MegaETH RPC nodes to verify ownership safely, securely, and with incredibly low latency.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Do users need to pay gas fees?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. The verification process requires an off-chain cryptographic signature proving they own the wallet address. Executing this signature costs zero gas and is 100% free for your community members.",
+            },
+        },
+    ],
+};
+
+const softwareAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Cachet",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: "https://usecachet.com",
+    description: "Strict NFT verification for MegaETH Discord communities. Connect wallets, verify on-chain holdings, and automate Discord role management.",
+    offers: [
+        {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+            name: "Free",
+            description: "100 verified members, 1 contract, 3 role mappings",
+        },
+        {
+            "@type": "Offer",
+            price: "14.99",
+            priceCurrency: "USD",
+            name: "Growth",
+            description: "1,500 verified members, 5 contracts, unlimited role mappings",
+        },
+        {
+            "@type": "Offer",
+            price: "39.99",
+            priceCurrency: "USD",
+            name: "Pro",
+            description: "10,000 verified members, unlimited contracts, 3 servers",
+        },
+    ],
+};
+
 export default function HomePage() {
     return (
         <div className="min-h-screen bg-brand-black text-brand-white flex flex-col font-sans">
+            <JsonLd data={homeFaqSchema} />
+            <JsonLd data={softwareAppSchema} />
             <Header showAuth />
 
             <main className="relative flex-1 overflow-hidden">

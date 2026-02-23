@@ -4,8 +4,15 @@ import { StaticHeader } from "@/components/StaticHeader";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-    title: "Documentation — Cachet",
-    description: "Setup instructions, bot commands, and getting started guide for Cachet NFT verification.",
+    title: "Documentation — Cachet NFT Verification Bot",
+    description: "Setup instructions, bot commands, and getting started guide for Cachet NFT verification on MegaETH Discord communities.",
+    alternates: {
+        canonical: "/docs",
+    },
+    openGraph: {
+        title: "Documentation — Cachet NFT Verification Bot",
+        url: "https://usecachet.com/docs",
+    },
 };
 
 export default function DocsPage() {
