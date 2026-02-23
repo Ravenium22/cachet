@@ -1,0 +1,12 @@
+﻿.git
+.gitignore
+node_modules
+**/node_modules
+.turbo
+**/.next
+**/dist
+.env
+.env.*
+*.log
+coverage
+.vscode

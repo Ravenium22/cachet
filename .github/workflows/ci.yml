@@ -1,0 +1,80 @@
+﻿name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript build
+        run: npm run build
+
+      - name: Check DB migrations are up-to-date
+        run: |
+          npx -w packages/db drizzle-kit generate --name ci_check 2>&1 || true
+          # If new migration files were generated, the schema is out of sync
+          if git diff --name-only | grep -q 'packages/db/drizzle/'; then
+            echo "::error::Database schema is out of sync! Run 'npm run db:generate' locally and commit the migration."
+            exit 1
+          fi
+
+      - name: ESLint (if configured)
+        run: npm run lint --if-present
+
+      - name: Tests (if configured)
+        run: npm test --if-present
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: validate
+    strategy:
+      matrix:
+        include:
+          - name: api
+            dockerfile: apps/api/Dockerfile
+          - name: worker
+            dockerfile: apps/api/Dockerfile.worker
+          - name: bot
+            dockerfile: apps/bot/Dockerfile
+          - name: web
+            dockerfile: apps/web/Dockerfile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and optionally push ${{ matrix.name }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/cachet-${{ matrix.name }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/cachet-${{ matrix.name }}:latest

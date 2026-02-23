@@ -1,0 +1,29 @@
+{
+  "name": "megaeth-verify",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:api": "turbo dev --filter=@megaeth-verify/api",
+    "dev:bot": "turbo dev --filter=@megaeth-verify/bot",
+    "dev:web": "turbo dev --filter=@megaeth-verify/web",
+    "db:generate": "turbo db:generate --filter=@megaeth-verify/db",
+    "db:migrate": "turbo db:migrate --filter=@megaeth-verify/db",
+    "db:push": "turbo db:push --filter=@megaeth-verify/db",
+    "db:studio": "turbo db:studio --filter=@megaeth-verify/db"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

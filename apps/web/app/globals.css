@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-brand-black text-brand-white antialiased;
+}
+
+/* Cachet global rules */
+::selection {
+  @apply bg-brand-green text-brand-black;
+}

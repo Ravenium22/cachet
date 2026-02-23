@@ -1,0 +1,23 @@
+{
+  "name": "@megaeth-verify/bot",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "register": "tsx src/register-commands.ts"
+  },
+  "dependencies": {
+    "@sentry/node": "^9.11.0",
+    "@megaeth-verify/db": "*",
+    "@megaeth-verify/shared": "*",
+    "discord.js": "^14.16.0",
+    "ioredis": "^5.4.0",
+    "pino": "^9.5.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

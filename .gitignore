@@ -1,0 +1,26 @@
+**/node_modules/
+**/dist/
+**/.turbo/
+**/.next/
+**/.env*
+!**/.env.example
+**/*.log
+.DS_Store
+Thumbs.db
+
+# Database
+packages/db/drizzle/*.sql
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Plan assets (keep Plan.md tracked)
+Plan.assets/
+Plan.docx
+
+# Agent skills (local tooling)
+.agents/
+.claude/
