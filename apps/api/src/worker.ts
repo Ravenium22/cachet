@@ -1,6 +1,7 @@
 ﻿import * as Sentry from "@sentry/node";
 import { closePool } from "@megaeth-verify/db";
 import { startReverificationWorkers } from "./jobs/reverify.js";
+import { startCryptoPaymentWorkers } from "./jobs/cryptoPayments.js";
 import { closeRedis } from "./services/redis.js";
 import { logger } from "./services/logger.js";
 
@@ -15,8 +16,11 @@ async function main() {
   const workers = await startReverificationWorkers();
   logger.info("Reverification worker started");
 
+  const cryptoWorkers = await startCryptoPaymentWorkers();
+  logger.info("Crypto payment workers started");
+
   async function shutdown() {
-    logger.info("Shutting down reverification worker...");
+    logger.info("Shutting down workers...");
 
     await Promise.all([
       workers.sweepWorker.close(),
@@ -25,6 +29,12 @@ async function main() {
       workers.sweepQueue.close(),
       workers.memberQueue.close(),
       workers.purgeQueue.close(),
+      cryptoWorkers.verifyWorker.close(),
+      cryptoWorkers.expireWorker.close(),
+      cryptoWorkers.renewalWorker.close(),
+      cryptoWorkers.verifyQueue.close(),
+      cryptoWorkers.expireQueue.close(),
+      cryptoWorkers.renewalQueue.close(),
     ]);
 
     await Promise.all([closePool(), closeRedis()]);

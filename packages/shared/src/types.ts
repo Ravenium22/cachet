@@ -91,6 +91,34 @@ export interface VerifyCompleteResult {
   rolesRemoved: string[];
 }
 
+// ── Crypto Payments ───────────────────────────────────────────────────────
+
+export type PaymentProvider = "crypto" | "paddle";
+export type CryptoPaymentStatus = "pending" | "submitted" | "verifying" | "confirmed" | "expired" | "failed";
+export type PaymentChain = "ethereum" | "base" | "arbitrum";
+export type PaymentToken = "usdc" | "usdt";
+
+export interface CryptoInvoice {
+  id: string;
+  projectId: string;
+  tier: SubscriptionTier;
+  billingPeriod: "monthly" | "annual";
+  amountUsdCents: number;
+  token: PaymentToken;
+  chain: PaymentChain;
+  recipientAddress: string;
+  amountToken: string;
+  txHash: string | null;
+  senderAddress: string | null;
+  status: CryptoPaymentStatus;
+  periodStart: string | null;
+  periodEnd: string | null;
+  expiresAt: string;
+  confirmedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Result of checking one role mapping against on-chain balance. */
 export interface RoleMappingCheck {
   roleMappingId: string;

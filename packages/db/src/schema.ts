@@ -45,6 +45,26 @@ export const verificationEventEnum = pgEnum("verification_event", [
   "expired",
 ]);
 
+export const cryptoPaymentStatusEnum = pgEnum("crypto_payment_status", [
+  "pending",
+  "submitted",
+  "verifying",
+  "confirmed",
+  "expired",
+  "failed",
+]);
+
+export const paymentChainEnum = pgEnum("payment_chain", [
+  "ethereum",
+  "base",
+  "arbitrum",
+]);
+
+export const paymentTokenEnum = pgEnum("payment_token", [
+  "usdc",
+  "usdt",
+]);
+
 // ── Tables ─────────────────────────────────────────────────────────────────
 
 export const projects = pgTable(
@@ -172,5 +192,37 @@ export const verificationLogs = pgTable(
   },
   (table) => [
     index("verification_logs_event_created_idx").on(table.eventType, table.createdAt),
+  ],
+);
+
+export const cryptoPayments = pgTable(
+  "crypto_payments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .references(() => projects.id, { onDelete: "cascade" })
+      .notNull(),
+    tier: subscriptionTierEnum("tier").notNull(),
+    billingPeriod: varchar("billing_period", { length: 10 }).notNull(),
+    amountUsdCents: integer("amount_usd_cents").notNull(),
+    token: paymentTokenEnum("token").notNull(),
+    chain: paymentChainEnum("chain").notNull(),
+    recipientAddress: varchar("recipient_address", { length: 42 }).notNull(),
+    amountToken: varchar("amount_token", { length: 78 }).notNull(),
+    txHash: varchar("tx_hash", { length: 66 }),
+    senderAddress: varchar("sender_address", { length: 42 }),
+    status: cryptoPaymentStatusEnum("status").default("pending").notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }),
+    periodEnd: timestamp("period_end", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("crypto_payments_project_id_idx").on(table.projectId),
+    index("crypto_payments_status_idx").on(table.status),
+    uniqueIndex("crypto_payments_tx_hash_unique").on(table.txHash),
+    index("crypto_payments_expires_at_idx").on(table.expiresAt),
   ],
 );

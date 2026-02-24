@@ -8,6 +8,7 @@ import { formatShortDate } from "@/lib/format";
 import Script from "next/script";
 import type { BillingPlan, SubscriptionStatus, SubscriptionTier } from "@megaeth-verify/shared";
 import { toast } from "sonner";
+import { CryptoCheckout } from "@/components/CryptoCheckout";
 
 interface Project {
   id: string;
@@ -43,6 +44,8 @@ interface VerificationStats {
   activeVerifications: number;
   recentVerifications: number;
 }
+
+const PAYMENT_PROVIDER = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "paddle";
 
 function formatLimit(value: number | null): string {
   return typeof value === "number" ? value.toLocaleString() : "Unlimited";
@@ -332,40 +335,64 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* H3: Full feature comparison on plan cards */}
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {plans?.map((plan) => (
-            <div key={plan.tier} className="rounded-[2px] border border-brand-green/50 bg-brand-black p-3 text-sm">
-              <p className="font-semibold text-brand-white">{plan.label}</p>
-              <p className="mt-1 font-mono text-brand-gray">
-                {plan.priceMonthlyUsd === null ? "CONTACT" : `$${plan.priceMonthlyUsd}/MO`}
+        {/* Renewal banner */}
+        {subscription && subscription.tier !== "free" && subscription.status === "active" && (() => {
+          const periodEnd = new Date(subscription.currentPeriodEnd);
+          const daysLeft = Math.ceil((periodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          if (daysLeft > 7) return null;
+          return (
+            <div className="mt-4 rounded-[2px] border border-yellow-500 bg-yellow-500/10 p-3">
+              <p className="font-mono text-xs text-yellow-400">
+                SUBSCRIPTION_EXPIRES_IN_{daysLeft}_DAYS — RENEW_NOW_TO_AVOID_DOWNGRADE
               </p>
-              <div className="mt-2 space-y-0.5 font-mono text-xs text-brand-gray">
-                <p>MEMBERS: {formatLimit(plan.limits.maxVerifiedMembers)}</p>
-                <p>CONTRACTS: {formatLimit(plan.limits.maxContracts)}</p>
-                <p>ROLE_MAPPINGS: {formatLimit(plan.limits.maxRoleMappings)}</p>
-                <p>SERVERS: {formatLimit(plan.limits.maxServers)}</p>
-                <p>ADMIN_CHECKS: {formatLimit(plan.limits.maxAdminChecksPerMonth)}</p>
-              </div>
-              {plan.tier === "enterprise" ? (
-                <a
-                  href="mailto:support@usecachet.com?subject=Enterprise%20Plan%20Inquiry"
-                  className="mt-3 inline-flex w-full items-center justify-center rounded-[2px] border border-brand-green bg-brand-black px-3 py-1.5 text-xs font-medium text-brand-white transition hover:bg-brand-green/10"
-                >
-                  CONTACT US
-                </a>
-              ) : (
-                <button
-                  onClick={() => handleCheckout(plan.tier)}
-                  disabled={plan.tier === "free" || billingLoading !== null || plan.tier === subscription?.tier}
-                  className="mt-3 rounded-[2px] bg-brand-white px-3 py-1.5 text-xs font-medium text-brand-black transition hover:bg-brand-gray disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {billingLoading === plan.tier ? "OPENING..." : plan.tier === "free" ? "INCLUDED" : plan.tier === subscription?.tier ? "CURRENT PLAN" : `CHOOSE ${plan.label.toUpperCase()}`}
-                </button>
-              )}
             </div>
-          ))}
-        </div>
+          );
+        })()}
+
+        {/* Plan selection: crypto or Paddle */}
+        {PAYMENT_PROVIDER === "crypto" ? (
+          <div className="mt-4 rounded-[2px] border border-brand-green/50 bg-brand-black p-4">
+            <CryptoCheckout
+              projectId={projectId}
+              currentTier={subscription?.tier ?? "free"}
+              onSubscriptionActivated={() => refetchSubscription()}
+            />
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {plans?.map((plan) => (
+              <div key={plan.tier} className="rounded-[2px] border border-brand-green/50 bg-brand-black p-3 text-sm">
+                <p className="font-semibold text-brand-white">{plan.label}</p>
+                <p className="mt-1 font-mono text-brand-gray">
+                  {plan.priceMonthlyUsd === null ? "CONTACT" : `$${plan.priceMonthlyUsd}/MO`}
+                </p>
+                <div className="mt-2 space-y-0.5 font-mono text-xs text-brand-gray">
+                  <p>MEMBERS: {formatLimit(plan.limits.maxVerifiedMembers)}</p>
+                  <p>CONTRACTS: {formatLimit(plan.limits.maxContracts)}</p>
+                  <p>ROLE_MAPPINGS: {formatLimit(plan.limits.maxRoleMappings)}</p>
+                  <p>SERVERS: {formatLimit(plan.limits.maxServers)}</p>
+                  <p>ADMIN_CHECKS: {formatLimit(plan.limits.maxAdminChecksPerMonth)}</p>
+                </div>
+                {plan.tier === "enterprise" ? (
+                  <a
+                    href="mailto:support@usecachet.com?subject=Enterprise%20Plan%20Inquiry"
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-[2px] border border-brand-green bg-brand-black px-3 py-1.5 text-xs font-medium text-brand-white transition hover:bg-brand-green/10"
+                  >
+                    CONTACT US
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => handleCheckout(plan.tier)}
+                    disabled={plan.tier === "free" || billingLoading !== null || plan.tier === subscription?.tier}
+                    className="mt-3 rounded-[2px] bg-brand-white px-3 py-1.5 text-xs font-medium text-brand-black transition hover:bg-brand-gray disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {billingLoading === plan.tier ? "OPENING..." : plan.tier === "free" ? "INCLUDED" : plan.tier === subscription?.tier ? "CURRENT PLAN" : `CHOOSE ${plan.label.toUpperCase()}`}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <form onSubmit={handleSave} className="mt-6 space-y-4">
@@ -467,8 +494,10 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* Paddle.js — only loaded on settings page where checkout happens */}
-      <Script src="https://cdn.paddle.com/paddle/v2/paddle.js" strategy="lazyOnload" />
+      {/* Paddle.js — only loaded when Paddle is the active payment provider */}
+      {PAYMENT_PROVIDER === "paddle" && (
+        <Script src="https://cdn.paddle.com/paddle/v2/paddle.js" strategy="lazyOnload" />
+      )}
     </div>
   );
 }
