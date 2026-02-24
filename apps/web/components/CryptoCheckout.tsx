@@ -21,7 +21,7 @@ interface CryptoCheckoutProps {
   onSubscriptionActivated: () => void;
 }
 
-type CheckoutStep = "configure" | "pay" | "verifying";
+type CheckoutStep = "configure" | "pay" | "verifying" | "failed";
 
 // Build chain list dynamically — only show chains that have at least one token
 const ALL_CHAINS = Object.entries(SUPPORTED_PAYMENT_CHAINS)
@@ -52,7 +52,7 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
   const [loading, setLoading] = useState(false);
   const [invoice, setInvoice] = useState<CryptoInvoice | null>(null);
   const [txHash, setTxHash] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"address" | "amount" | false>(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const plan = BILLING_PLANS.find((p) => p.tier === tier);
@@ -88,10 +88,14 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
           onSubscriptionActivated();
           setStep("configure");
           setInvoice(null);
-        } else if (data.status === "failed") {
+        } else if (data.status === "failed" || data.status === "expired") {
           if (pollRef.current) clearInterval(pollRef.current);
-          toast.error("Payment verification failed. Please check your transaction.");
-          setStep("pay");
+          toast.error(
+            data.status === "expired"
+              ? "Invoice expired. Please create a new one."
+              : "Payment verification failed. The transaction did not match the invoice.",
+          );
+          setStep("failed");
         }
       } catch {
         // Ignore poll errors
@@ -138,9 +142,9 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
     }
   };
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text: string, kind: "address" | "amount") => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
+    setCopied(kind);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -285,20 +289,28 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
                 {invoice.recipientAddress}
               </code>
               <button
-                onClick={() => handleCopy(invoice.recipientAddress)}
+                onClick={() => handleCopy(invoice.recipientAddress, "address")}
                 className="shrink-0 rounded-[2px] border border-brand-green px-2 py-1 font-mono text-[10px] text-brand-gray transition hover:text-brand-white"
               >
-                {copied ? "COPIED" : "COPY"}
+                {copied === "address" ? "COPIED" : "COPY"}
               </button>
             </div>
           </div>
 
           <div className="flex gap-4">
             <div>
-              <p className="font-mono text-[10px] text-brand-gray">AMOUNT</p>
-              <p className="font-mono text-sm font-bold text-brand-white">
-                {displayAmount} {invoice.token.toUpperCase()}
-              </p>
+              <p className="font-mono text-[10px] text-brand-gray">EXACT_AMOUNT</p>
+              <div className="flex items-center gap-2">
+                <p className="font-mono text-sm font-bold text-brand-white">
+                  {displayAmount} {invoice.token.toUpperCase()}
+                </p>
+                <button
+                  onClick={() => handleCopy(displayAmount, "amount")}
+                  className="shrink-0 rounded-[2px] border border-brand-green px-1.5 py-0.5 font-mono text-[9px] text-brand-gray transition hover:text-brand-white"
+                >
+                  {copied === "amount" ? "COPIED" : "COPY"}
+                </button>
+              </div>
             </div>
             <div>
               <p className="font-mono text-[10px] text-brand-gray">CHAIN</p>
@@ -310,6 +322,12 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
                 {minutesLeft}:{String(secondsLeft).padStart(2, "0")}
               </p>
             </div>
+          </div>
+
+          <div className="rounded-[2px] border border-yellow-500/40 bg-yellow-500/5 px-3 py-2">
+            <p className="font-mono text-[10px] text-yellow-400">
+              SEND THE EXACT AMOUNT SHOWN ABOVE. PAYMENTS WITH A DIFFERENT AMOUNT, WRONG TOKEN, OR WRONG CHAIN WILL BE REJECTED. DO NOT INCLUDE EXTRA GAS FEES IN THE TOKEN AMOUNT.
+            </p>
           </div>
         </div>
 
@@ -337,6 +355,40 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
           className="w-full rounded-[2px] border border-brand-green px-4 py-2 font-mono text-xs text-brand-gray transition hover:text-brand-white"
         >
           CANCEL
+        </button>
+      </div>
+    );
+  }
+
+  // ── Failed step ──────────────────────────────────────────────────────
+
+  if (step === "failed") {
+    return (
+      <div className="space-y-4 text-center">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-brand-red">
+          <span className="text-lg text-brand-red">X</span>
+        </div>
+        <p className="font-mono text-xs uppercase tracking-widest text-brand-red">
+          VERIFICATION_FAILED
+        </p>
+        <p className="font-mono text-[10px] text-brand-gray">
+          THE TRANSACTION DID NOT MATCH THE INVOICE REQUIREMENTS.<br />
+          CHECK THAT YOU SENT THE EXACT AMOUNT, CORRECT TOKEN, AND TO THE RIGHT ADDRESS.
+        </p>
+        {invoice?.txHash && (
+          <p className="font-mono text-[10px] text-brand-gray break-all">
+            TX: {invoice.txHash}
+          </p>
+        )}
+        <button
+          onClick={() => {
+            setStep("configure");
+            setInvoice(null);
+            setTxHash("");
+          }}
+          className="w-full rounded-[2px] bg-brand-green px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-brand-black transition hover:bg-brand-green/80"
+        >
+          TRY AGAIN WITH NEW INVOICE
         </button>
       </div>
     );

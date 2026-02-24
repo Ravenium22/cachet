@@ -268,6 +268,15 @@ export async function verifyOnChainPayment(invoiceId: string): Promise<CryptoInv
       throw new Error(`Insufficient confirmations: ${confirmations}/${chainConfig.confirmations}`);
     }
 
+    // Anti-replay: tx must be mined AFTER the invoice was created
+    const block = await client.getBlock({ blockNumber: receipt.blockNumber });
+    const blockTimestamp = Number(block.timestamp) * 1000; // seconds → ms
+    const invoiceCreatedAt = invoice.createdAt.getTime();
+    // Allow 60s tolerance for block timestamp drift
+    if (blockTimestamp < invoiceCreatedAt - 60_000) {
+      throw new Error("Transaction was mined before this invoice was created");
+    }
+
     // Parse Transfer events from the receipt logs
     const token = invoice.token as PaymentToken;
     const tokenAddress = chainConfig.tokens[token];
@@ -297,7 +306,8 @@ export async function verifyOnChainPayment(invoiceId: string): Promise<CryptoInv
         const value = (decoded.args as { value: bigint }).value;
         const from = (decoded.args as { from: string }).from;
 
-        if (to === expectedRecipient && value >= expectedAmount) {
+        // Exact amount match — reject overpayments to prevent reusing larger txs
+        if (to === expectedRecipient && value === expectedAmount) {
           transferFound = true;
           senderAddress = from;
           break;
@@ -308,7 +318,7 @@ export async function verifyOnChainPayment(invoiceId: string): Promise<CryptoInv
     }
 
     if (!transferFound) {
-      throw new Error("No matching ERC-20 Transfer event found in transaction");
+      throw new Error("No matching ERC-20 Transfer found — check token, amount, and recipient");
     }
 
     // Success — confirm the payment
