@@ -309,7 +309,7 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <div>
               <p className="font-mono text-[10px] text-brand-gray">EXACT_AMOUNT</p>
               <div className="flex items-center gap-2">
@@ -323,6 +323,9 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
                   {copied === "amount" ? "COPIED" : "COPY"}
                 </button>
               </div>
+              <p className="mt-0.5 font-mono text-[10px] text-brand-gray">
+                ${(invoice.amountUsdCents / 100).toFixed(2)} USD
+              </p>
             </div>
             <div>
               <p className="font-mono text-[10px] text-brand-gray">CHAIN</p>
