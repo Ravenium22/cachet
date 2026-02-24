@@ -67,6 +67,9 @@ export const paymentChainEnum = pgEnum("payment_chain", [
 export const paymentTokenEnum = pgEnum("payment_token", [
   "usdc",
   "usdt",
+  "usde",
+  "usdm",
+  "honey",
 ]);
 
 // ── Tables ─────────────────────────────────────────────────────────────────

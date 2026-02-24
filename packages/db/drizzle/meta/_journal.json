@@ -36,6 +36,13 @@
       "when": 1771948227091,
       "tag": "0004_new_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771949101096,
+      "tag": "0005_wise_mach_iv",
+      "breakpoints": true
     }
   ]
 }

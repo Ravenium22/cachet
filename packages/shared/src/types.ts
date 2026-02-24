@@ -96,7 +96,7 @@ export interface VerifyCompleteResult {
 export type PaymentProvider = "crypto" | "paddle";
 export type CryptoPaymentStatus = "pending" | "submitted" | "verifying" | "confirmed" | "expired" | "failed";
 export type PaymentChain = "ethereum" | "base" | "arbitrum" | "optimism" | "berachain" | "megaeth" | "hyperevm";
-export type PaymentToken = "usdc" | "usdt";
+export type PaymentToken = "usdc" | "usdt" | "usde" | "usdm" | "honey";
 
 export interface CryptoInvoice {
   id: string;

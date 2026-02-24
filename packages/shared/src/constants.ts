@@ -152,6 +152,9 @@ export const CRYPTO_PAYMENT_INVOICE_TTL_SECONDS = 3600; // 1 hour
 export const TOKEN_DECIMALS = {
   usdc: 6,
   usdt: 6,
+  usde: 18,
+  usdm: 18, // MegaETH native stablecoin
+  honey: 18, // Berachain native stablecoin
 } as const;
 
 /**
@@ -172,6 +175,9 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     tokens: {
       usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" as string | null,
       usdt: "0xdAC17F958D2ee523a2206206994597C13D831ec7" as string | null,
+      usde: null as string | null,
+      usdm: null as string | null,
+      honey: null as string | null,
     },
   },
   base: {
@@ -184,6 +190,9 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     tokens: {
       usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as string | null,
       usdt: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2" as string | null,
+      usde: null as string | null,
+      usdm: null as string | null,
+      honey: null as string | null,
     },
   },
   arbitrum: {
@@ -196,6 +205,9 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     tokens: {
       usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" as string | null,
       usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" as string | null,
+      usde: null as string | null,
+      usdm: null as string | null,
+      honey: null as string | null,
     },
   },
   optimism: {
@@ -208,6 +220,9 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     tokens: {
       usdc: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85" as string | null,
       usdt: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58" as string | null,
+      usde: null as string | null,
+      usdm: null as string | null,
+      honey: null as string | null,
     },
   },
   berachain: {
@@ -220,6 +235,9 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     tokens: {
       usdc: "0x549943e04f40284185054145c6e4e9568c1d3241" as string | null, // USDC.e bridged via Stargate
       usdt: null as string | null,
+      usde: null as string | null,
+      usdm: null as string | null,
+      honey: "0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce" as string | null,
     },
   },
   megaeth: {
@@ -230,8 +248,11 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     blockExplorer: "https://megaeth.blockscout.com",
     confirmations: 2,
     tokens: {
-      usdc: null as string | null, // Not yet deployed — update when available
+      usdc: null as string | null,
       usdt: null as string | null,
+      usde: "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34" as string | null,
+      usdm: "0xFAfDdbb3FC7688494971a79cc65DCa3EF82079E7" as string | null,
+      honey: null as string | null,
     },
   },
   hyperevm: {
@@ -244,6 +265,9 @@ export const SUPPORTED_PAYMENT_CHAINS = {
     tokens: {
       usdc: "0xb88339cb7199b77e23db6e890353e22632ba630f" as string | null, // Native Circle USDC
       usdt: null as string | null,
+      usde: null as string | null,
+      usdm: null as string | null,
+      honey: null as string | null,
     },
   },
 } as const;

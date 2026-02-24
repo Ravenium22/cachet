@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   SUPPORTED_PAYMENT_CHAINS,
   BILLING_PLANS,
+  TOKEN_DECIMALS,
 } from "@megaeth-verify/shared";
 import type {
   SubscriptionTier,
@@ -30,6 +31,9 @@ const ALL_CHAINS = Object.entries(SUPPORTED_PAYMENT_CHAINS)
 const ALL_TOKENS: { value: PaymentToken; label: string }[] = [
   { value: "usdc", label: "USDC" },
   { value: "usdt", label: "USDT" },
+  { value: "usde", label: "USDe" },
+  { value: "usdm", label: "USDm" },
+  { value: "honey", label: "HONEY" },
 ];
 
 function formatTokenAmount(amountToken: string, decimals: number): string {
@@ -262,7 +266,8 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
 
   if (step === "pay" && invoice) {
     const chainConfig = SUPPORTED_PAYMENT_CHAINS[invoice.chain as PaymentChain];
-    const displayAmount = formatTokenAmount(invoice.amountToken, 6);
+    const tokenDecimals = TOKEN_DECIMALS[invoice.token as PaymentToken];
+    const displayAmount = formatTokenAmount(invoice.amountToken, tokenDecimals);
 
     return (
       <div className="space-y-4">

@@ -63,7 +63,7 @@ const checkoutSchema = z.object({
   projectId: z.string().uuid(),
   tier: z.enum(["growth", "pro"]),
   billingPeriod: z.enum(["monthly", "annual"]),
-  token: z.enum(["usdc", "usdt"]),
+  token: z.enum(["usdc", "usdt", "usde", "usdm", "honey"]),
   chain: z.enum(["ethereum", "base", "arbitrum", "optimism", "berachain", "megaeth", "hyperevm"]),
 });
 
