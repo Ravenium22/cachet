@@ -40,7 +40,18 @@ function formatTokenAmount(amountToken: string, decimals: number): string {
   const raw = amountToken.padStart(decimals + 1, "0");
   const intPart = raw.slice(0, raw.length - decimals) || "0";
   const decPart = raw.slice(raw.length - decimals);
+  // Keep all significant digits (don't trim — exact amount is required)
   return `${intPart}.${decPart}`;
+}
+
+/** Trim trailing zeros for display, but keep at least `minDecimals` places */
+function formatTokenAmountDisplay(amountToken: string, decimals: number, minDecimals = 2): string {
+  const full = formatTokenAmount(amountToken, decimals);
+  const [intPart, decPart] = full.split(".");
+  // Find last non-zero digit position (but keep at least minDecimals)
+  let end = decPart.length;
+  while (end > minDecimals && decPart[end - 1] === "0") end--;
+  return `${intPart}.${decPart.slice(0, end)}`;
 }
 
 export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated }: CryptoCheckoutProps) {
@@ -273,7 +284,8 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
   if (step === "pay" && invoice) {
     const chainConfig = SUPPORTED_PAYMENT_CHAINS[invoice.chain as PaymentChain];
     const tokenDecimals = TOKEN_DECIMALS[invoice.token as PaymentToken];
-    const displayAmount = formatTokenAmount(invoice.amountToken, tokenDecimals);
+    const fullAmount = formatTokenAmount(invoice.amountToken, tokenDecimals);
+    const displayAmount = formatTokenAmountDisplay(invoice.amountToken, tokenDecimals);
 
     return (
       <div className="space-y-4">
@@ -305,7 +317,7 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
                   {displayAmount} {invoice.token.toUpperCase()}
                 </p>
                 <button
-                  onClick={() => handleCopy(displayAmount, "amount")}
+                  onClick={() => handleCopy(fullAmount, "amount")}
                   className="shrink-0 rounded-[2px] border border-brand-green px-1.5 py-0.5 font-mono text-[9px] text-brand-gray transition hover:text-brand-white"
                 >
                   {copied === "amount" ? "COPIED" : "COPY"}

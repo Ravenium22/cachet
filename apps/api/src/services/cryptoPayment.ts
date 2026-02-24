@@ -100,7 +100,16 @@ function usdCentsToTokenUnits(amountUsdCents: number, token: PaymentToken): stri
   // cents → dollars = / 100, then * 10^decimals
   // Equivalent: amountUsdCents * 10^(decimals - 2)
   const factor = BigInt(10 ** (decimals - 2));
-  return (BigInt(amountUsdCents) * factor).toString();
+  const baseAmount = BigInt(amountUsdCents) * factor;
+
+  // Add a random micro-suffix (1–9999 smallest units) so every invoice has a
+  // unique on-chain amount.  This prevents tx-hash front-running: an attacker
+  // cannot reuse someone else's transfer because the amounts won't match.
+  // For USDC (6 dec) 9999 units = $0.009999 — negligible.
+  // For 18-dec tokens 9999 units ≈ 0.000000000000009999 — invisible.
+  const suffix = BigInt(Math.floor(Math.random() * 9999) + 1);
+
+  return (baseAmount + suffix).toString();
 }
 
 function getPlanPrice(tier: SubscriptionTier, billingPeriod: "monthly" | "annual"): number {
@@ -242,14 +251,14 @@ export async function verifyOnChainPayment(invoiceId: string): Promise<CryptoInv
   const chainConfig = SUPPORTED_PAYMENT_CHAINS[chain];
 
   try {
-    // Prevent tx hash replay: check no other confirmed invoice uses this hash
+    // Prevent tx hash replay: check no other invoice (any status) uses this hash
     const existing = await db.query.cryptoPayments.findFirst({
       where: and(
         eq(cryptoPayments.txHash, invoice.txHash),
-        eq(cryptoPayments.status, "confirmed"),
+        sql`${cryptoPayments.id} != ${invoiceId}`,
       ),
     });
-    if (existing && existing.id !== invoiceId) {
+    if (existing) {
       throw new Error("Transaction hash already used for another payment");
     }
 
