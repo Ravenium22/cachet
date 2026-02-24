@@ -41,15 +41,30 @@ const ERC20_TRANSFER_ABI = parseAbi([
 
 const chainClients = new Map<string, PublicClient>();
 
+function resolveRpcUrl(chain: PaymentChain): string {
+  const config = SUPPORTED_PAYMENT_CHAINS[chain];
+
+  // 1. Per-chain override takes priority
+  const override = process.env[config.rpcEnvVar];
+  if (override) return override;
+
+  // 2. Build from Alchemy API key
+  const alchemyKey = process.env["ALCHEMY_API_KEY"];
+  if (alchemyKey) {
+    return `https://${config.alchemySlug}.g.alchemy.com/v2/${alchemyKey}`;
+  }
+
+  throw new Error(
+    `No RPC configured for ${chain}. Set ALCHEMY_API_KEY or ${config.rpcEnvVar}.`,
+  );
+}
+
 function getChainClient(chain: PaymentChain): PublicClient {
   const existing = chainClients.get(chain);
   if (existing) return existing;
 
   const config = SUPPORTED_PAYMENT_CHAINS[chain];
-  const rpcUrl = process.env[config.rpcEnvVar];
-  if (!rpcUrl) {
-    throw new Error(`Missing env var ${config.rpcEnvVar} for chain ${chain}`);
-  }
+  const rpcUrl = resolveRpcUrl(chain);
 
   const viemChain = defineChain({
     id: config.chainId,
@@ -140,6 +155,12 @@ export async function createCryptoInvoice(
   token: PaymentToken,
   chain: PaymentChain,
 ): Promise<CryptoInvoice> {
+  // Verify token is available on chosen chain
+  const chainConfig = SUPPORTED_PAYMENT_CHAINS[chain];
+  if (!chainConfig.tokens[token]) {
+    throw new Error(`${token.toUpperCase()} is not available on ${chainConfig.name}`);
+  }
+
   const amountUsdCents = getPlanPrice(tier, billingPeriod);
   const amountToken = usdCentsToTokenUnits(amountUsdCents, token);
   const recipientAddress = getRecipientAddress();
@@ -249,7 +270,11 @@ export async function verifyOnChainPayment(invoiceId: string): Promise<CryptoInv
 
     // Parse Transfer events from the receipt logs
     const token = invoice.token as PaymentToken;
-    const expectedTokenAddress = chainConfig.tokens[token].toLowerCase();
+    const tokenAddress = chainConfig.tokens[token];
+    if (!tokenAddress) {
+      throw new Error(`${token.toUpperCase()} is not available on ${chainConfig.name}`);
+    }
+    const expectedTokenAddress = tokenAddress.toLowerCase();
     const expectedRecipient = invoice.recipientAddress.toLowerCase();
     const expectedAmount = BigInt(invoice.amountToken);
 

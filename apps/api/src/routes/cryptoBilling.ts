@@ -64,7 +64,7 @@ const checkoutSchema = z.object({
   tier: z.enum(["growth", "pro"]),
   billingPeriod: z.enum(["monthly", "annual"]),
   token: z.enum(["usdc", "usdt"]),
-  chain: z.enum(["ethereum", "base", "arbitrum"]),
+  chain: z.enum(["ethereum", "base", "arbitrum", "optimism", "berachain", "megaeth", "hyperevm"]),
 });
 
 cryptoBillingRouter.post("/checkout", requireAuth, authenticatedApiRateLimit(), async (req, res, next) => {

@@ -58,6 +58,10 @@ export const paymentChainEnum = pgEnum("payment_chain", [
   "ethereum",
   "base",
   "arbitrum",
+  "optimism",
+  "berachain",
+  "megaeth",
+  "hyperevm",
 ]);
 
 export const paymentTokenEnum = pgEnum("payment_token", [

@@ -22,13 +22,12 @@ interface CryptoCheckoutProps {
 
 type CheckoutStep = "configure" | "pay" | "verifying";
 
-const CHAINS: { value: PaymentChain; label: string }[] = [
-  { value: "ethereum", label: "Ethereum" },
-  { value: "base", label: "Base" },
-  { value: "arbitrum", label: "Arbitrum" },
-];
+// Build chain list dynamically — only show chains that have at least one token
+const ALL_CHAINS = Object.entries(SUPPORTED_PAYMENT_CHAINS)
+  .filter(([, cfg]) => cfg.tokens.usdc || cfg.tokens.usdt)
+  .map(([key, cfg]) => ({ value: key as PaymentChain, label: cfg.name }));
 
-const TOKENS: { value: PaymentToken; label: string }[] = [
+const ALL_TOKENS: { value: PaymentToken; label: string }[] = [
   { value: "usdc", label: "USDC" },
   { value: "usdt", label: "USDT" },
 ];
@@ -44,7 +43,7 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
   const [step, setStep] = useState<CheckoutStep>("configure");
   const [tier, setTier] = useState<"growth" | "pro">("growth");
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
-  const [chain, setChain] = useState<PaymentChain>("base");
+  const [chain, setChain] = useState<PaymentChain>(ALL_CHAINS[0]?.value ?? "base");
   const [token, setToken] = useState<PaymentToken>("usdc");
   const [loading, setLoading] = useState(false);
   const [invoice, setInvoice] = useState<CryptoInvoice | null>(null);
@@ -197,11 +196,18 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
         {/* Chain selector */}
         <div>
           <label className="block font-mono text-xs text-brand-gray">CHAIN</label>
-          <div className="mt-1 flex gap-2">
-            {CHAINS.map((c) => (
+          <div className="mt-1 flex flex-wrap gap-2">
+            {ALL_CHAINS.map((c) => (
               <button
                 key={c.value}
-                onClick={() => setChain(c.value)}
+                onClick={() => {
+                  setChain(c.value);
+                  // Auto-switch token if current one isn't available on new chain
+                  const cfg = SUPPORTED_PAYMENT_CHAINS[c.value];
+                  if (!cfg.tokens[token]) {
+                    setToken(cfg.tokens.usdc ? "usdc" : "usdt");
+                  }
+                }}
                 className={`rounded-[2px] border px-3 py-1.5 font-mono text-xs uppercase transition ${
                   chain === c.value
                     ? "border-brand-white bg-brand-white text-brand-black"
@@ -214,11 +220,11 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
           </div>
         </div>
 
-        {/* Token selector */}
+        {/* Token selector — only show tokens available on selected chain */}
         <div>
           <label className="block font-mono text-xs text-brand-gray">TOKEN</label>
           <div className="mt-1 flex gap-2">
-            {TOKENS.map((t) => (
+            {ALL_TOKENS.filter((t) => SUPPORTED_PAYMENT_CHAINS[chain].tokens[t.value]).map((t) => (
               <button
                 key={t.value}
                 onClick={() => setToken(t.value)}

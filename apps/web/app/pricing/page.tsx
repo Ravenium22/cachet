@@ -37,7 +37,7 @@ const pricingFaqSchema = {
             name: "What payment methods do you accept?",
             acceptedAnswer: {
                 "@type": "Answer",
-                text: "We accept USDC and USDT stablecoin payments on Ethereum, Base, and Arbitrum. All prices are in USD.",
+                text: "We accept USDC and USDT stablecoin payments on Ethereum, Base, Arbitrum, Optimism, Berachain, MegaETH, and HyperEVM. All prices are in USD.",
             },
         },
         {
@@ -112,7 +112,7 @@ export default function PricingPage() {
                             Choose the plan that fits your community. Upgrade, downgrade, or cancel at any time.
                         </p>
                         <p className="mt-3 inline-block rounded-[2px] border border-brand-green bg-brand-green/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-brand-green">
-                            CRYPTO PAYMENTS ACCEPTED — USDC / USDT ON ETHEREUM, BASE, ARBITRUM
+                            CRYPTO PAYMENTS ACCEPTED — USDC / USDT ON 7+ CHAINS
                         </p>
 
                         {/* Billing interval toggle */}
@@ -258,7 +258,7 @@ export default function PricingPage() {
                             <div>
                                 <p className="font-mono text-xs font-bold uppercase tracking-widest text-brand-white">WHAT PAYMENT METHODS DO YOU ACCEPT?</p>
                                 <p className="mt-2 font-mono text-xs uppercase text-brand-gray leading-relaxed">
-                                    We accept USDC and USDT stablecoin payments on Ethereum, Base, and Arbitrum. All prices are in USD.
+                                    We accept USDC and USDT stablecoin payments on Ethereum, Base, Arbitrum, Optimism, Berachain, MegaETH, and HyperEVM. All prices are in USD.
                                 </p>
                             </div>
                             <div>

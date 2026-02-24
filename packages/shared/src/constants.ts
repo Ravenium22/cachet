@@ -154,38 +154,96 @@ export const TOKEN_DECIMALS = {
   usdt: 6,
 } as const;
 
+/**
+ * Alchemy RPC slug → full URL is built as:
+ *   https://{alchemySlug}.g.alchemy.com/v2/{ALCHEMY_API_KEY}
+ *
+ * Per-chain override: set {CHAIN}_RPC_URL env var (e.g. MEGAETH_RPC_URL).
+ * Tokens set to null are not yet verified on that chain and hidden in the UI.
+ */
 export const SUPPORTED_PAYMENT_CHAINS = {
   ethereum: {
     chainId: 1,
     name: "Ethereum",
+    alchemySlug: "eth-mainnet",
     rpcEnvVar: "ETHEREUM_RPC_URL",
     blockExplorer: "https://etherscan.io",
     confirmations: 2,
     tokens: {
-      usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      usdt: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" as string | null,
+      usdt: "0xdAC17F958D2ee523a2206206994597C13D831ec7" as string | null,
     },
   },
   base: {
     chainId: 8453,
     name: "Base",
+    alchemySlug: "base-mainnet",
     rpcEnvVar: "BASE_RPC_URL",
     blockExplorer: "https://basescan.org",
     confirmations: 2,
     tokens: {
-      usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      usdt: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+      usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as string | null,
+      usdt: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2" as string | null,
     },
   },
   arbitrum: {
     chainId: 42161,
     name: "Arbitrum",
+    alchemySlug: "arb-mainnet",
     rpcEnvVar: "ARBITRUM_RPC_URL",
     blockExplorer: "https://arbiscan.io",
     confirmations: 2,
     tokens: {
-      usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-      usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" as string | null,
+      usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" as string | null,
+    },
+  },
+  optimism: {
+    chainId: 10,
+    name: "Optimism",
+    alchemySlug: "opt-mainnet",
+    rpcEnvVar: "OPTIMISM_RPC_URL",
+    blockExplorer: "https://optimistic.etherscan.io",
+    confirmations: 2,
+    tokens: {
+      usdc: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85" as string | null,
+      usdt: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58" as string | null,
+    },
+  },
+  berachain: {
+    chainId: 80094,
+    name: "Berachain",
+    alchemySlug: "berachain-mainnet",
+    rpcEnvVar: "BERACHAIN_RPC_URL",
+    blockExplorer: "https://berascan.com",
+    confirmations: 2,
+    tokens: {
+      usdc: "0x549943e04f40284185054145c6e4e9568c1d3241" as string | null, // USDC.e bridged via Stargate
+      usdt: null as string | null,
+    },
+  },
+  megaeth: {
+    chainId: 4326,
+    name: "MegaETH",
+    alchemySlug: "megaeth-mainnet",
+    rpcEnvVar: "MEGAETH_RPC_URL",
+    blockExplorer: "https://megaeth.blockscout.com",
+    confirmations: 2,
+    tokens: {
+      usdc: null as string | null, // Not yet deployed — update when available
+      usdt: null as string | null,
+    },
+  },
+  hyperevm: {
+    chainId: 999,
+    name: "HyperEVM",
+    alchemySlug: "hyperliquid-mainnet",
+    rpcEnvVar: "HYPEREVM_RPC_URL",
+    blockExplorer: "https://purrsec.com",
+    confirmations: 2,
+    tokens: {
+      usdc: "0xb88339cb7199b77e23db6e890353e22632ba630f" as string | null, // Native Circle USDC
+      usdt: null as string | null,
     },
   },
 } as const;
