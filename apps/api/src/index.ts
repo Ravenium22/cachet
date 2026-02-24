@@ -9,6 +9,7 @@ import { projectsRouter } from "./routes/projects.js";
 import { verifyRouter } from "./routes/verify.js";
 import { billingRouter } from "./routes/billing.js";
 import { cryptoBillingRouter } from "./routes/cryptoBilling.js";
+import { adminRouter } from "./routes/admin.js";
 import { webhooksRouter } from "./routes/webhooks.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { logger } from "./services/logger.js";
@@ -186,6 +187,7 @@ app.use("/api/v1/projects", projectsRouter);
 app.use("/api/v1/verify", verifyRouter);
 app.use("/api/v1/billing", billingRouter);
 app.use("/api/v1/billing/crypto", cryptoBillingRouter);
+app.use("/api/v1/admin", adminRouter);
 
 app.use(errorHandler);
 
