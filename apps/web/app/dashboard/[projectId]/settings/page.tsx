@@ -45,7 +45,7 @@ interface VerificationStats {
   recentVerifications: number;
 }
 
-const PAYMENT_PROVIDER = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "paddle";
+const PAYMENT_PROVIDER = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "crypto";
 
 function formatLimit(value: number | null): string {
   return typeof value === "number" ? value.toLocaleString() : "Unlimited";

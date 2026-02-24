@@ -25,7 +25,7 @@ type CheckoutStep = "configure" | "pay" | "verifying";
 
 // Build chain list dynamically — only show chains that have at least one token
 const ALL_CHAINS = Object.entries(SUPPORTED_PAYMENT_CHAINS)
-  .filter(([, cfg]) => cfg.tokens.usdc || cfg.tokens.usdt)
+  .filter(([, cfg]) => Object.values(cfg.tokens).some(Boolean))
   .map(([key, cfg]) => ({ value: key as PaymentChain, label: cfg.name }));
 
 const ALL_TOKENS: { value: PaymentToken; label: string }[] = [
@@ -209,7 +209,9 @@ export function CryptoCheckout({ projectId, currentTier, onSubscriptionActivated
                   // Auto-switch token if current one isn't available on new chain
                   const cfg = SUPPORTED_PAYMENT_CHAINS[c.value];
                   if (!cfg.tokens[token]) {
-                    setToken(cfg.tokens.usdc ? "usdc" : "usdt");
+                    const firstAvailable = (Object.entries(cfg.tokens) as [PaymentToken, string | null][])
+                      .find(([, addr]) => addr !== null);
+                    if (firstAvailable) setToken(firstAvailable[0]);
                   }
                 }}
                 className={`rounded-[2px] border px-3 py-1.5 font-mono text-xs uppercase transition ${
