@@ -8,6 +8,10 @@ import { pingCommand } from "./commands/ping.js";
 import { setupCommand } from "./commands/setup.js";
 import { helpCommand } from "./commands/help.js";
 import { statusCommand } from "./commands/status.js";
+import { lookupCommand } from "./commands/lookup.js";
+import { revokeCommand } from "./commands/revoke.js";
+import { reverifyCommand } from "./commands/reverify.js";
+import { auditCommand } from "./commands/audit.js";
 import { logger } from "./logger.js";
 
 if (process.env["SENTRY_DSN"]) {
@@ -34,6 +38,10 @@ commands.set(pingCommand.data.name, pingCommand);
 commands.set(setupCommand.data.name, setupCommand);
 commands.set(helpCommand.data.name, helpCommand);
 commands.set(statusCommand.data.name, statusCommand);
+commands.set(lookupCommand.data.name, lookupCommand);
+commands.set(revokeCommand.data.name, revokeCommand);
+commands.set(reverifyCommand.data.name, reverifyCommand);
+commands.set(auditCommand.data.name, auditCommand);
 
 declare module "discord.js" {
   interface Client {

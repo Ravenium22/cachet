@@ -8,12 +8,12 @@ import {
   buildVerificationMessage,
   type VerifyTokenData,
 } from "@megaeth-verify/shared";
-import { getDb, projects, eq, and, isNull } from "@megaeth-verify/db";
+import { getDb, projects, verifications, eq, and, isNull } from "@megaeth-verify/db";
 import { getRedis } from "../services/redis.js";
 import { requireBotAuth } from "../middleware/botAuth.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { executeVerification } from "../services/verification.js";
-import { enforceMemberLimitForUser } from "../services/subscription.js";
+import { executeVerification, reverifyUser } from "../services/verification.js";
+import { enforceMemberLimitForUser, enforceManualReverifyLimit } from "../services/subscription.js";
 import {
   publicApiRateLimit,
   verificationCompletionRateLimit,
@@ -187,6 +187,59 @@ verifyRouter.post("/:token/complete", publicApiRateLimit(), verificationCompleti
         walletAddress: result.walletAddress,
         rolesGranted: result.rolesGranted,
         rolesRemoved: result.rolesRemoved,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── POST /verify/reverify ─────────────────────────────────────────────────
+// Bot-internal: force re-verify a user by guild ID + Discord user ID.
+verifyRouter.post("/reverify", requireBotAuth, async (req, res, next) => {
+  try {
+    const schema = z.object({
+      guildId: z.string().min(1).max(20),
+      userDiscordId: z.string().min(1).max(20),
+    });
+
+    const { guildId, userDiscordId } = schema.parse(req.body);
+
+    const db = getDb();
+    const project = await db.query.projects.findFirst({
+      where: and(eq(projects.discordGuildId, guildId), isNull(projects.deletedAt)),
+    });
+
+    if (!project) {
+      throw new AppError(404, "No project configured for this server");
+    }
+
+    await enforceManualReverifyLimit(project.id);
+
+    const verification = await db.query.verifications.findFirst({
+      where: and(
+        eq(verifications.projectId, project.id),
+        eq(verifications.userDiscordId, userDiscordId),
+      ),
+    });
+
+    if (!verification) {
+      throw new AppError(404, "User has no verification record in this server");
+    }
+
+    if (verification.status !== "active") {
+      throw new AppError(400, `Verification is ${verification.status}, cannot reverify`);
+    }
+
+    const result = await reverifyUser(verification.id, "manual");
+
+    res.json({
+      success: true,
+      data: {
+        walletAddress: result.walletAddress,
+        rolesGranted: result.rolesGranted,
+        rolesRemoved: result.rolesRemoved,
+        stillHoldsNft: result.rolesGranted.length > 0,
       },
     });
   } catch (err) {

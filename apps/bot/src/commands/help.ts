@@ -39,6 +39,26 @@ export const helpCommand: BotCommand = {
           name: "/help",
           value: "Show this help message.",
           inline: false,
+        },
+        {
+          name: "/lookup @user",
+          value: "Look up a user's wallet, roles, and verification status. *Admin only.*",
+          inline: false,
+        },
+        {
+          name: "/revoke @user",
+          value: "Revoke a user's verification and remove granted roles. *Admin only.*",
+          inline: false,
+        },
+        {
+          name: "/reverify @user",
+          value: "Force an immediate re-check of a user's NFT holdings. *Admin only.*",
+          inline: false,
+        },
+        {
+          name: "/audit",
+          value: "Show recent verification activity (verified, revoked, re-checked). *Admin only.*",
+          inline: false,
         }
       )
       .addFields({

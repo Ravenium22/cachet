@@ -3,6 +3,10 @@ import { pingCommand } from "./commands/ping.js";
 import { setupCommand } from "./commands/setup.js";
 import { helpCommand } from "./commands/help.js";
 import { statusCommand } from "./commands/status.js";
+import { lookupCommand } from "./commands/lookup.js";
+import { revokeCommand } from "./commands/revoke.js";
+import { reverifyCommand } from "./commands/reverify.js";
+import { auditCommand } from "./commands/audit.js";
 
 const token = process.env["DISCORD_BOT_TOKEN"];
 const clientId = process.env["DISCORD_CLIENT_ID"];
@@ -17,6 +21,10 @@ const commands = [
   setupCommand.data.toJSON(),
   helpCommand.data.toJSON(),
   statusCommand.data.toJSON(),
+  lookupCommand.data.toJSON(),
+  revokeCommand.data.toJSON(),
+  reverifyCommand.data.toJSON(),
+  auditCommand.data.toJSON(),
 ];
 
 const rest = new REST({ version: "10" }).setToken(token);
