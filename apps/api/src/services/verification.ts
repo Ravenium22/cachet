@@ -224,6 +224,18 @@ export async function executeVerification(
     ...(unknownCount > 0 ? [`\n⚠ ${unknownCount} check(s) could not be completed due to RPC errors. Your existing roles for those were preserved.`] : []),
   ];
 
+  // Append custom welcome message if configured
+  const settings = (project.settings ?? {}) as Record<string, unknown>;
+  const welcomeMsg = typeof settings["welcomeMessage"] === "string" ? settings["welcomeMessage"].trim() : "";
+  if (welcomeMsg) {
+    const rendered = welcomeMsg
+      .replace(/\{username\}/g, `<@${userDiscordId}>`)
+      .replace(/\{wallet\}/g, `\`${walletAddress}\``)
+      .replace(/\{server\}/g, project.name ?? "Unknown Server")
+      .replace(/\{roles\}/g, finalRoles.length > 0 ? finalRoles.map((r) => `<@&${r}>`).join(", ") : "None");
+    lines.push("", rendered);
+  }
+
   await sendDM(userDiscordId, lines.join("\n")).catch((err) => {
     console.warn(`Failed to DM user ${userDiscordId}:`, err);
   });

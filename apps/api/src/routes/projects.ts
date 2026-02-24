@@ -93,7 +93,11 @@ projectsRouter.patch("/:id", requireProjectOwner, async (req, res, next) => {
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.name !== undefined) updates["name"] = body.name;
-    if (body.settings !== undefined) updates["settings"] = body.settings;
+    if (body.settings !== undefined) {
+      // Merge with existing settings instead of replacing
+      const existing = (req.project!.settings ?? {}) as Record<string, unknown>;
+      updates["settings"] = { ...existing, ...body.settings };
+    }
 
     const [updated] = await db
       .update(projects)

@@ -78,6 +78,7 @@ export default function SettingsPage() {
 
   const [name, setName] = useState("");
   const [channelId, setChannelId] = useState("");
+  const [welcomeMessage, setWelcomeMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [billingLoading, setBillingLoading] = useState<SubscriptionTier | "portal" | null>(null);
@@ -120,6 +121,7 @@ export default function SettingsPage() {
     if (project) {
       setName(project.name);
       setChannelId(project.verificationChannelId ?? "");
+      setWelcomeMessage(typeof project.settings?.welcomeMessage === "string" ? project.settings.welcomeMessage : "");
     }
   }, [project]);
 
@@ -132,6 +134,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           name,
           verificationChannelId: channelId || null,
+          settings: { welcomeMessage: welcomeMessage || null },
         }),
       });
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
@@ -430,6 +433,22 @@ export default function SettingsPage() {
             className="mt-1 w-full rounded-[2px] border border-brand-green bg-brand-black px-3 py-2 text-sm text-brand-white focus:border-brand-white focus:outline-none focus:ring-1 focus:ring-brand-white"
           />
           <p className="mt-1 font-mono text-xs text-brand-gray">CHANNEL_WHERE_VERIFICATION_BOT_SENDS_MESSAGES</p>
+        </div>
+
+        {/* Welcome message */}
+        <div>
+          <label className="block text-sm font-medium text-brand-gray">Welcome Message</label>
+          <textarea
+            value={welcomeMessage}
+            onChange={(e) => setWelcomeMessage(e.target.value)}
+            placeholder="Welcome to {server}, {username}! You've been verified with wallet {wallet} and granted roles: {roles}"
+            rows={4}
+            maxLength={1000}
+            className="mt-1 w-full rounded-[2px] border border-brand-green bg-brand-black px-3 py-2 text-sm text-brand-white focus:border-brand-white focus:outline-none focus:ring-1 focus:ring-brand-white"
+          />
+          <p className="mt-1 font-mono text-xs text-brand-gray">
+            CUSTOM_DM_SENT_AFTER_VERIFICATION. PLACEHOLDERS: {"{username}"} {"{wallet}"} {"{server}"} {"{roles}"}. LEAVE_EMPTY_TO_DISABLE.
+          </p>
         </div>
 
         {/* H4: Human-readable created at */}
